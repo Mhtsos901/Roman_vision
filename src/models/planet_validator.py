@@ -31,7 +31,7 @@ class PlanetValidator:
         merged = tf.keras.layers.Concatenate()([xg, xl])
 
         # --- 4. Fully Connected Layers ---
-        dense = tf.keras.layers.Dense(64, activation='relu')(merged)
+        dense = tf.keras.layers.Dense(64, activation='relu', name='feature_layer')(merged)
         dense = tf.keras.layers.Dropout(0.4)(dense)
         output = tf.keras.layers.Dense(1, activation='sigmoid', name='output')(dense)
 
@@ -64,3 +64,14 @@ class PlanetValidator:
         input_data = self.preprocess(phase, flux)
         probability = self.model.predict(input_data, verbose=0)[0][0]
         return probability
+
+    def get_features(self, phase, flux):
+        input_data = self.preprocess(phase, flux)
+
+        feature_model = tf.keras.Model(
+            inputs=self.model.input,
+            outputs=self.model.get_layer('feature_layer').output
+        )
+
+        embeddings = feature_model.predict(input_data, verbose=0)
+        return embeddings.flatten()
