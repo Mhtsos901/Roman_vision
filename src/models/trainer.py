@@ -181,9 +181,36 @@ class ModelTrainer:
         # Επιστρέφουμε λίστα με τα X (όπως απαιτεί το functional API του Keras) και το y
         return [X_global, X_local], y
 
-    def train(self, epochs=30):
+    def train(self, epochs=30, model_path='models/planet_validator_realistic.h5'):
+        import os
+        from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+
+        # Σιγουρευόμαστε ότι υπάρχει ο φάκελος
+        os.makedirs(os.path.dirname(model_path), exist_ok=True)
+
         X, y = self.generate_training_data()
+
+        # 1. Σταματάει αν το val_loss δεν βελτιωθεί για 10 εποχές
+        early_stop = EarlyStopping(
+            monitor='val_loss',
+            patience=10,
+            verbose=1,
+            restore_best_weights=True  # Επιστρέφει στα καλύτερα βάρη αυτόματα!
+        )
+
+        # 2. Σώζει ΜΟΝΟ το καλύτερο μοντέλο
+        checkpoint = ModelCheckpoint(
+            model_path,
+            monitor='val_loss',
+            save_best_only=True,
+            verbose=1
+        )
+
         history = self.validator.model.fit(
-            X, y, epochs=epochs, validation_split=0.2, verbose=1
+            X, y,
+            epochs=epochs,
+            validation_split=0.2,
+            callbacks=[early_stop, checkpoint],
+            verbose=1
         )
         return history

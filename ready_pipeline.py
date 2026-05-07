@@ -18,11 +18,6 @@ prep = Preprocessor(outlier_sigma=5.0, savgol_window=21)
 trainer = ModelTrainer(validator, prep, input_length=201, n_synthetic=800, n_real_positive=5)
 history = trainer.train(epochs=50)
 
-# Αποθήκευση του νέου μοντέλου
-new_model_path = 'models/planet_validator_realistic.h5'
-validator.model.save(new_model_path)
-print(f"Νέο μοντέλο αποθηκεύτηκε: {new_model_path}")
-
 # =========================================================
 # 2. ΔΟΚΙΜΗ ΣΕ ΠΡΑΓΜΑΤΙΚΑ ΔΕΔΟΜΕΝΑ (WASP-18 b)
 # =========================================================
